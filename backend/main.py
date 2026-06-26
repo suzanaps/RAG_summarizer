@@ -10,12 +10,19 @@ from fastapi.staticfiles import StaticFiles
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from routes.router import api_router
+from contextlib import asynccontextmanager
+from db.database import init_models
+from models.document_model import Document
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #STATIC_DIR = os.path.join(BASE_DIR, "static")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_models()
+    yield
 
-app = FastAPI(title="Resumo de arquivos com RAG")
+app = FastAPI(title="Resumo de arquivos com RAG", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
