@@ -17,8 +17,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 from typing import Optional
-from backend.repositories.user_repository import user
+from repositories.user_repository import user
 from sqlalchemy.ext.asyncio import AsyncSession
+from db.database import get_db
 
 
 
@@ -59,7 +60,7 @@ def create_access_token(user: dict) -> str:
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-def get_current_user(db: AsyncSession, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: AsyncSession = Depends(get_db)):
     try:
         payload = jwt.decode(
             credentials.credentials,
@@ -75,11 +76,11 @@ def get_current_user(db: AsyncSession, credentials: HTTPAuthorizationCredentials
     if not email:
         raise HTTPException(status_code=401, detail="Token invalido.")
 
-    user = user.get_by_email(db,email)
-    if not user:
+    db_user = await user.get_by_email(db,email)
+    if not db_user:
         raise HTTPException(status_code=401, detail="Usuario nao encontrado.")
 
-    return user
+    return db_user
 
 def validate_email(email: str):
     if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email.strip()):
