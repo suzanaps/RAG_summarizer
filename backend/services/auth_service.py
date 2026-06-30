@@ -15,12 +15,9 @@ JWT_SECRET_KEY = settings.secret_key
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel
-from typing import Optional
 from repositories.user_repository import user
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import get_db
-
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

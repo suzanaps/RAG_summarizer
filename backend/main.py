@@ -6,23 +6,19 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from routes.router import api_router
 from contextlib import asynccontextmanager
-from db.database import init_models
-from models.document_model import Document
+
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_models()
-    yield
 
-app = FastAPI(title="Resumo de arquivos com RAG", lifespan=lifespan)
+
+app = FastAPI(title="Resumo de arquivos com RAG")
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,7 +33,11 @@ app.include_router(api_router)
 
 
 #os.makedirs(STATIC_DIR, exist_ok=True)
+from db.database import Base
+from db.database import engine
 
+
+Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     import uvicorn

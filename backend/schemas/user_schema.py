@@ -16,15 +16,27 @@ class UserBase(BaseModel):
         return v
 
 class UserCreate(UserBase):
-    pass
+    username: str
+    description: Optional[str] = None
+    profile_picture: Optional[str] = None
+    name: str
+
 
 class UserUpdate(BaseModel):
     email:Optional[str] = None
     password:Optional[str] = None
+    username: Optional[str] = None
+    description: Optional[str] = None
+    profile_picture: Optional[str] = None
+    name: Optional[str] = None
+
 
 class UserPublic(BaseModel):
     id:int
     email:str
+    username:str
+    description:str
+    name: str
 
 
 class LoginRequest(BaseModel):
@@ -38,6 +50,5 @@ class AuthResponse(BaseModel):
     user: UserPublic
    
   
-
     class Config:
         from_attributes=True

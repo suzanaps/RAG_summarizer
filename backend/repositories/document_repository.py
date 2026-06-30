@@ -12,8 +12,8 @@ class DocumentRepository:
             user_id=user_id
         )
         session.add(document)
-        await session.commit()
-        await session.refresh(document)
+        session.commit()
+        session.refresh(document)
         return document
 
     async def get(self, session: AsyncSession, document_id: int) -> Optional[Document]:
