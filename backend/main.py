@@ -13,6 +13,8 @@ from routes.router import api_router
 from contextlib import asynccontextmanager
 from db.database import init_models
 from models.document_model import Document
+from models.user_model import User
+from models.summary_model import Summary
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #STATIC_DIR = os.path.join(BASE_DIR, "static")

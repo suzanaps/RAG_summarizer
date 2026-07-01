@@ -55,7 +55,9 @@ async def upload_document(
         session=db,
         filename=file.filename,
         filepath=filepath,
-        user_id=current_user.id
+        user_id=current_user.id,
+        size_bytes=file_size,
+        content_type=file.content_type
     )
 
     return document
