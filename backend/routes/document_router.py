@@ -1,11 +1,12 @@
 import os
 import uuid
 import shutil
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import get_db
 from models.user_model import User
-from schemas.document_schema import DocumentResponse
+from schemas.document_schema import DocumentResponse, DocumentListResponse, DocumentItem
 from repositories.document_repository import document_repo
 from services.auth_service import get_current_user
 
@@ -61,3 +62,59 @@ async def upload_document(
     )
 
     return document
+
+
+@router.get("", response_model=DocumentListResponse)
+async def list_documents(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    skip = (page - 1) * limit
+    total = await document_repo.count_by_user(db, current_user.id)
+    documents = await document_repo.list_by_user(db, current_user.id, skip=skip, limit=limit)
+    
+    items = []
+    for doc in documents:
+        size_bytes = doc.size_bytes
+        if size_bytes is None and doc.filepath and os.path.exists(doc.filepath):
+            size_bytes = os.path.getsize(doc.filepath)
+            
+        items.append(DocumentItem(
+            id=doc.id,
+            filename=doc.filename,
+            size_bytes=size_bytes,
+            content_type=doc.content_type or "application/pdf",
+            upload_date=doc.upload_date
+        ))
+        
+    return DocumentListResponse(
+        items=items,
+        page=page,
+        limit=limit,
+        total=total
+    )
+
+
+@router.get("/{document_id}", response_class=FileResponse)
+async def download_document(
+    document_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    document = await document_repo.get(db, document_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Arquivo nao encontrado.")
+        
+    if document.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Acesso negado. Este arquivo pertence a outro usuario.")
+        
+    if not os.path.exists(document.filepath):
+        raise HTTPException(status_code=404, detail="Arquivo fisico nao encontrado no servidor.")
+        
+    return FileResponse(
+        path=document.filepath,
+        filename=document.filename,
+        media_type=document.content_type or "application/pdf"
+    )
