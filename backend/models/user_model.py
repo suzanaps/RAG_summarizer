@@ -2,6 +2,9 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import List
+
+from db.base import Base
 
 from db.database import Base
 
@@ -15,6 +18,8 @@ class User(Base):
     username = Column(String, unique=True)
 
     email = Column(String, unique=True)
+    
+    documents = Column(List[Document])
 
     password = Column(String)
 
@@ -24,5 +29,6 @@ class User(Base):
 
     documents = relationship(
         "Document",
-        back_populates="user"
+        back_populates="user",
+       cascade="all, delete-orphan"
     )
