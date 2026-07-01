@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.database import get_db
@@ -20,12 +20,12 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)) -> Au
     if not user_login:
         raise HTTPException(status_code=401, detail="E-mail incorreto.")
 
-    if not verify_password(request.password, user_login.hashed_password):
+    if not verify_password(request.password, user_login.password):
         raise HTTPException(status_code=401, detail="Senha incorreta.")
 
     access_token = create_access_token(user_login)
     return AuthResponse(
         access_token=access_token,
         token_type="bearer",
-        user=UserPublic(id=user_login.id, email=user_login.email),
+        user=UserPublic(id=user_login.id, email=user_login.email, username=user_login.username, name=user_login.name, description=user_login.description),
     )
