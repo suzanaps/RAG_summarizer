@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Summarizer — Gerenciamento de Documentos</title>
+    <!-- Google Fonts: Inter e Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app">
+        <!-- 1. AUTHENTICATION SECTION (Login & Signup) -->
+        <section id="auth-section" class="auth-section">
+            <div class="auth-card glass">
+                <div class="auth-header">
+                    <div class="logo-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h1 class="auth-title">RAG Summarizer</h1>
+                    <p class="auth-subtitle" id="auth-subtitle-text">Faça login para gerenciar seus documentos PDF</p>
+                </div>
+
+                <!-- Forms -->
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label for="login-email">E-mail</label>
+                        <input type="email" id="login-email" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Senha</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Entrar</span>
+                        <div class="spinner btn-spinner hidden"></div>
+                    </button>
+                    <p class="auth-toggle-text">Não tem uma conta? <a href="#" id="to-signup">Cadastre-se</a></p>
+                </form>
+
+                <form id="signup-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label for="signup-email">E-mail</label>
+                        <input type="email" id="signup-email" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Senha</label>
+                        <input type="password" id="signup-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-confirm-password">Confirmar Senha</label>
+                        <input type="password" id="signup-confirm-password" required minlength="6" placeholder="Confirme sua senha">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Cadastrar</span>
+                        <div class="spinner btn-spinner hidden"></div>
+                    </button>
+                    <p class="auth-toggle-text">Já tem uma conta? <a href="#" id="to-login">Faça login</a></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- 2. DASHBOARD SECTION (Post-Authentication) -->
+        <section id="dashboard-section" class="dashboard-section hidden">
+            <!-- Sidebar -->
+            <aside class="sidebar glass">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>RAG Summarizer</span>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="active">
+                            <a href="#" id="nav-docs">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon">
+                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>Documentos</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="user-profile">
+                        <div class="user-avatar" id="user-avatar-initials">U</div>
+                        <div class="user-details">
+                            <span class="user-email" id="sidebar-user-email">usuario@email.com</span>
+                            <span class="user-role">Usuário</span>
+                        </div>
+                    </div>
+                    <button id="logout-btn" class="btn-logout" title="Sair da Conta">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Panel -->
+            <main class="main-panel">
+                <header class="main-header glass">
+                    <div class="header-title-container">
+                        <h1>Meus Documentos</h1>
+                        <p class="header-subtitle">Envie e gerencie seus arquivos PDF para geração de resumos</p>
+                    </div>
+                </header>
+
+                <div class="main-content">
+                    <div class="dashboard-grid">
+                        
+                        <!-- Upload Card -->
+                        <div class="card glass upload-card">
+                            <div class="card-header">
+                                <h2 class="card-title">Enviar Novo Documento</h2>
+                            </div>
+                            <div class="card-body">
+                                <div id="drop-zone" class="drop-zone">
+                                    <input type="file" id="file-input" accept="application/pdf" class="hidden">
+                                    <div class="drop-zone-content">
+                                        <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <p class="drop-zone-text">Arraste seu PDF aqui ou <span>clique para buscar</span></p>
+                                        <p class="drop-zone-subtext">Apenas arquivos PDF são aceitos (Máx. 50 MB)</p>
+                                    </div>
+                                    <div id="upload-progress-bar" class="upload-progress-bar hidden">
+                                        <div class="progress-fill" id="progress-fill"></div>
+                                        <span class="progress-text" id="progress-text">Enviando...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Listing Card -->
+                        <div class="card glass files-card">
+                            <div class="card-header flex-between">
+                                <h2 class="card-title">Arquivos PDF</h2>
+                                <div class="card-actions">
+                                    <input type="text" id="search-input" class="search-input" placeholder="Buscar pelo nome...">
+                                </div>
+                            </div>
+                            
+                            <!-- Table View -->
+                            <div class="table-wrapper">
+                                <table class="files-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-checkbox">
+                                                <div class="checkbox-container">
+                                                    <input type="checkbox" id="select-all-checkbox">
+                                                </div>
+                                            </th>
+                                            <th class="col-name">Nome do Arquivo</th>
+                                            <th class="col-date">Data de Envio</th>
+                                            <th class="col-size">Tamanho</th>
+                                            <th class="col-actions">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="files-list-body">
+                                        <!-- Preenchido pelo JavaScript -->
+                                    </tbody>
+                                </table>
+
+                                <!-- Empty State -->
+                                <div id="empty-state" class="empty-state hidden">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"></path>
+                                        <path d="M14 2V8H20"></path>
+                                        <line x1="8" y1="13" x2="16" y2="13"></line>
+                                        <line x1="8" y1="17" x2="16" y2="17"></line>
+                                    </svg>
+                                    <h3>Nenhum arquivo encontrado</h3>
+                                    <p>Envie seu primeiro arquivo PDF acima para começar a gerar resumos.</p>
+                                </div>
+
+                                <!-- Loading State -->
+                                <div id="loading-state" class="loading-state hidden">
+                                    <div class="spinner-large"></div>
+                                    <p>Carregando seus documentos...</p>
+                                </div>
+                            </div>
+
+                            <!-- Footer / Pagination -->
+                            <div class="card-footer flex-between">
+                                <div class="pagination-info" id="pagination-info-text">
+                                    Mostrando 0-0 de 0 arquivos
+                                </div>
+                                <div class="pagination-controls">
+                                    <div class="limit-selector flex-center">
+                                        <label for="limit-select">Limitar por página:</label>
+                                        <select id="limit-select">
+                                            <option value="5">5</option>
+                                            <option value="10" selected>10</option>
+                                            <option value="20">20</option>
+                                            <option value="50">50</option>
+                                        </select>
+                                    </div>
+                                    <button id="prev-page-btn" class="btn btn-secondary btn-icon" disabled>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <span class="page-indicator" id="page-indicator-text">1</span>
+                                    <button id="next-page-btn" class="btn btn-secondary btn-icon" disabled>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SELECTION BAR (Floating action bar shown at bottom when items are checked) -->
+                <div id="selection-bar" class="selection-bar glass hidden">
+                    <div class="selection-details">
+                        <span class="badge" id="selected-count-badge">0</span>
+                        <span class="selection-text">arquivos selecionados</span>
+                    </div>
+                    <div class="selection-actions">
+                        <button id="action-summary-btn" class="btn btn-primary">
+                            <span>Gerar Resumo Integrado</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                        <button id="clear-selection-btn" class="btn btn-secondary">Limpar Seleção</button>
+                    </div>
+                </div>
+            </main>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
