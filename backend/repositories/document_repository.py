@@ -23,12 +23,14 @@ class DocumentRepository:
             content_type=content_type
         )
         session.add(document)
-        session.commit()
-        session.refresh(document)
+        await session.commit()
+        await session.refresh(document)
         return document
 
     async def get(self, session: AsyncSession, document_id: int) -> Optional[Document]:
-        return await session.get(Document, document_id)
+        query = select(Document).where(Document.id == document_id)
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
 
     async def list_by_user(self, session: AsyncSession, user_id: int, skip: int = 0, limit: int = 50) -> Iterable[Document]:
         query = select(Document).where(Document.user_id == user_id).order_by(Document.upload_date.desc()).offset(skip).limit(limit)

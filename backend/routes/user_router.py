@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.auth_service import validate_email, create_access_token
@@ -28,7 +30,7 @@ async def create_user(
     return AuthResponse(
         access_token=access_token,
         token_type="bearer",
-        user=UserPublic(id=user.id, email=user.email),
+        user=UserPublic(id=user.id, email=user.email, username=user.username, name=user.name, description=user.description),
     )
 
 
@@ -62,10 +64,10 @@ async def update_user(
     return user
 
 
-@router.delete("/{user_id}", response_model=UserPublic)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-) -> UserPublic:
-    user = await remover_usuario(db, user_id)
-    return user
+) -> None:
+    await remover_usuario(db, user_id)
+    return None

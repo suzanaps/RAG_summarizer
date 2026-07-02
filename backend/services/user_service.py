@@ -17,8 +17,7 @@ async def adicionar_usuario(
 ):
     existing_user = await user.get_by_email(session, payload.email)
     existing_username = await user.get_by_username(session, payload.username)
-    #print(existing_user.email)
-    
+
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -62,26 +61,25 @@ async def atualizar_usuario(
     usuario_id: int,
     payload: UserUpdate,
 ):
-    user = await user.get(session, usuario_id)
-    if not user:
+    user_update = await user.get(session, usuario_id)
+    if not user_update:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Usuário não encontrado"
         )
 
-    return await user.update(session, user, email=payload.email, password=payload.password)
-   
+    return await user.update(session, user_update, email=payload.email, password=payload.password, username=payload.username, description=payload.description, name=payload.name, profile_picture=payload.profile_picture)
 
 
 async def remover_usuario(
     session: AsyncSession,
     usuario_id: int,
 ):
-    user = await user.get(session, usuario_id)
-    if not user:
+    user_delete = await user.get(session, usuario_id)
+    if not user_delete:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Usuário não encontrado"
         )
 
-    return await user.delete(session=session, user=user)
+    return await user.delete(session=session, user=user_delete)

@@ -28,8 +28,8 @@ class UserRepository:
         hash_password = self.get_hash_password(user.password)
         new_user = User(username=user.username,description=user.description, name=user.name, profile_picture=user.profile_picture,email=normalized_email, password=hash_password)
         session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
+        await session.commit()
+        await session.refresh(new_user)
         return new_user
 
 
@@ -47,7 +47,7 @@ class UserRepository:
         if email is not None:
             user.email = email
         if password is not None:
-            user.password = password
+            user.password = self.get_hash_password(password)
         if username is not None:
             user.username = username
         if description is not None:
@@ -73,19 +73,19 @@ class UserRepository:
     async def get_by_email(self,session:AsyncSession, email:str)->Optional[User]:
         normalized_email = email.strip().lower()
         query = select(User).where(User.email == normalized_email)
-        result = session.execute(query)
+        result = await session.execute(query)
         return result.scalar_one_or_none()
     
     async def get_by_username(self,session:AsyncSession, username:str)->Optional[User]:
         query = select(User).where(User.username == username)
-        result = session.execute(query)
+        result = await session.execute(query)
         return result.scalar_one_or_none()
 
 
     async def list(self,session:AsyncSession, *,skip: int =0, limit: int = 50,) -> Iterable[User]:
         query = select(User)
         query = query.offset(skip).limit(limit)
-        result = session.execute(query)
+        result = await session.execute(query)
         return result.scalars().all()
 
 

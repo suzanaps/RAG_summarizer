@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 
+
 class DocumentResponse(BaseModel):
     id: int
     filename: str

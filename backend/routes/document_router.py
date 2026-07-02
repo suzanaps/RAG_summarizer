@@ -96,6 +96,28 @@ async def list_documents(
         total=total
     )
 
+@router.get ("/{document_id}", response_class=FileResponse)
+async def get_document(
+    document_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    document = await document_repo.get(db, document_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Arquivo nao encontrado.")
+        
+    if document.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Acesso negado. Este arquivo pertence a outro usuario.")
+        
+    if not os.path.exists(document.filepath):
+        raise HTTPException(status_code=404, detail="Arquivo fisico nao encontrado no servidor.")
+        
+    return FileResponse(
+        path=document.filepath,
+        filename=document.filename,
+        media_type=document.content_type or "application/pdf"
+    )
+
 
 @router.get("/{document_id}", response_class=FileResponse)
 async def download_document(

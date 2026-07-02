@@ -10,10 +10,6 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from routes.router import api_router
 from contextlib import asynccontextmanager
-from db.database import init_models
-from models.document_model import Document
-from models.user_model import User
-from models.summary_model import Summary
 
 
 
@@ -36,12 +32,6 @@ app.add_middleware(
 app.include_router(api_router)
 
 
-#os.makedirs(STATIC_DIR, exist_ok=True)
-from db.database import Base
-from db.database import engine
-
-
-Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     import uvicorn
